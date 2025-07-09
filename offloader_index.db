@@ -1,0 +1,56 @@
+import sqlite3
+from pathlib import Path
+from datetime import datetime
+
+DB_PATH = Path.home() / ".offloader" / "offloader_index.db"
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS files (
+    path TEXT PRIMARY KEY,
+    mtime REAL NOT NULL,
+    size INTEGER NOT NULL
+);
+"""
+
+
+class DBIndex:
+    def __init__(self, db_path=DB_PATH):
+        self.db_path = Path(db_path)
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.conn = sqlite3.connect(str(self.db_path))
+        self._init_schema()
+
+    def _init_schema(self):
+        cur = self.conn.cursor()
+        cur.executescript(SCHEMA)
+        self.conn.commit()
+
+    def get_all(self):
+        """Return dict of path -> (mtime, size)"""
+        cur = self.conn.cursor()
+        cur.execute("SELECT path, mtime, size FROM files")
+        return {row[0]: (row[1], row[2]) for row in cur.fetchall()}
+
+    def upsert(self, path: str, mtime: float, size: int):
+        cur = self.conn.cursor()
+        cur.execute(
+            "INSERT INTO files(path, mtime, size) VALUES (?, ?, ?) ON CONFLICT(path) DO UPDATE SET mtime=excluded.mtime, size=excluded.size",
+            (path, mtime, size),
+        )
+        self.conn.commit()
+
+    def remove(self, path: str):
+        cur = self.conn.cursor()
+        cur.execute("DELETE FROM files WHERE path = ?", (path,))
+        self.conn.commit()
+
+    def close(self):
+        self.conn.close()
+
+
+# Usage example:
+# db = DBIndex()
+# index = db.get_all()
+# db.upsert(str(f), stat.st_mtime, stat.st_size)
+# db.remove(str(f))
+# db.close()

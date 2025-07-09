@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "offloader"
+version = "0.1.0"
+description = "A small GUI-driven offloader to Google Drive"
+authors = ["Zack Kramer, zckramer83@gmail.com"]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
