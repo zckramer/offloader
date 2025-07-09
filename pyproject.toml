@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "offloader"
 version = "0.1.0"
-description = "A small GUI-driven offloader to Google Drive"
+description = "A small GUI-driven offloader to Google Drive. https://github.com/zckramer/offloader"
 authors = ["Zack Kramer, zckramer83@gmail.com"]
 
 [tool.black]
